@@ -2,10 +2,12 @@ import React from "react";
 import { useState } from "react";
 import "./App.css";
 import { marked } from "marked";
+import hljs from "highlight.js";
+import javascript from "highlight.js/lib/languages/javascript";
+hljs.registerLanguage("javascript", javascript);
 
 function App() {
   const [raw, setRaw] = useState(placeholder);
-  const [html, setHtml] = useState("");
 
   const preview = marked.parse(
     "# Marked in Node.js\n\nRendered by **marked**."
@@ -18,21 +20,23 @@ function App() {
   const parseToHtml = (str) => {
     marked.setOptions({
       renderer: new marked.Renderer(),
+      highlight: function (code, lang, _callback) {
+        if (hljs.getLanguage(lang)) return hljs.highlight(lang, code).value;
+        return hljs.highlightAuto(code).value;
+      },
+      langPrefix: "hljs language-",
       pedantic: false,
       gfm: true,
       breaks: true,
-      sanitize: true,
+      // sanitize: true,
       smartLists: true,
       smartypants: false,
       xhtml: false,
     });
-    const result = marked.parse(str);
+    const result = marked(str);
     return result;
   };
-  // React.useEffect(() => {
-  //   console.log("first load");
-  //   parseToHtml();
-  // }, [raw]);
+
   return (
     <main>
       <ul id="dots">
